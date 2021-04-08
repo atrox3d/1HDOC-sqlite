@@ -48,7 +48,6 @@ else:
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db = SQLAlchemy(app)
 
-
     class Book(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         title = db.Column(db.String(250), nullable=False, unique=True)
@@ -56,7 +55,33 @@ else:
         rating = db.Column(db.Float, nullable=False)
 
         def __repr__(self):
-            return f'<Book {self.title}'
-
+            return f'<Book {self.title}>'
 
     db.create_all()
+
+    book = Book(id=1, title="Harry Potter", author="JK", rating=9.5)
+    try:
+        db.session.add(book)
+        db.session.commit()
+    except Exception as e:
+        logger.error(e)
+        db.session.rollback()
+    # read all records
+    all_books = db.session.query(Book).all()
+    print(all_books)
+    # read a record by query
+    hp = Book.query.filter_by(title="Harry Potter").first()
+    print(hp)
+    # update a record by query
+    hp.title += ", update"
+    db.session.commit()
+    # update a record by id
+    hp = Book.query.get(1)
+    print(hp)
+    hp.title = "Harry Potter"
+    db.session.commit()
+    # delete a record by id
+    hp = Book.query.get(1)
+    print(hp)
+    db.session.delete(hp)
+    db.session.commit()
