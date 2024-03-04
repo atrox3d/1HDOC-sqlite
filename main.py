@@ -1,4 +1,4 @@
-SQLLITE3 = False
+SQLLITE3 = True
 
 if SQLLITE3:
     import sqlite3
@@ -12,6 +12,9 @@ if SQLLITE3:
     sqlite3.connect = log_decorator(sqlite3.connect)
 
     db = sqlite3.connect('books-collection.db')
+
+    #https://stackoverflow.com/a/41920171
+    db.row_factory = sqlite3.Row
     cursor = db.cursor()
 
     execute = log_decorator(cursor.execute)
@@ -31,6 +34,15 @@ if SQLLITE3:
     except Exception as e:
         logger.error(e.__class__.__name__)
         logger.error(e)
+
+    sql = "SELECT * FROM books"
+    logger.info(sql)
+    cursor: sqlite3.Cursor = execute(sql)
+    logger.info(cursor.description)
+    rows = cursor.fetchall()
+    for row in rows:
+        logger.info(row)
+        logger.info(dict(row))
 
 else:
     from flask import Flask
@@ -85,3 +97,4 @@ else:
     print(hp)
     db.session.delete(hp)
     db.session.commit()
+
